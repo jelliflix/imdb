@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const sortParam = "date_added,desc"
+
 type IMDB struct {
 	user string
 	opts Options
@@ -119,9 +121,9 @@ func (i *IMDB) watchlist(kind, sort string) (watchlist []string, err error) {
 }
 
 func (i *IMDB) GetMovies() ([]string, error) {
-	return i.watchlist("movie", "date_added,desc")
+	return i.watchlist("movie", sortParam)
 }
 
 func (i *IMDB) GetSeries() ([]string, error) {
-	return i.watchlist("tvSeries", "date_added,desc")
+	return i.watchlist("tvSeries", sortParam)
 }
