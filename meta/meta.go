@@ -26,8 +26,11 @@ type Options struct {
 }
 
 type Meta struct {
+	Episode int
+	Season  int
+	Year    int
+
 	Title string
-	Year  int
 }
 
 func NewOMDB(opts Options, apiKey string) *OMDB {
@@ -41,18 +44,26 @@ var DefaultOptions = Options{
 
 func (m *Meta) UnmarshalJSON(data []byte) error {
 	var v struct {
+		Episode string `json:"Episode,required"`
+		Season  string `json:"Season,required"`
+		Year    string `json:"Year,required"`
+
 		Title string `json:"Title,required"`
-		Year  string `json:"Year,required"`
 	}
 
 	if err := json.Unmarshal(data, &v); err != nil {
 		return err
 	}
 
+	episode, _ := strconv.ParseInt(v.Episode, 0, 64)
+	season, _ := strconv.ParseInt(v.Season, 0, 64)
 	year, _ := strconv.ParseInt(strings.ReplaceAll(strings.Split(v.Year, "–")[0], "–", ""), 0, 64)
 
-	m.Title = v.Title
+	m.Episode = int(episode)
+	m.Season = int(season)
 	m.Year = int(year)
+
+	m.Title = v.Title
 
 	return nil
 }
@@ -107,7 +118,7 @@ func (o *OMDB) GetMovie(_ context.Context, id string) (torrent.Meta, error) {
 	return torrent.Meta(meta), err
 }
 
-func (o *OMDB) GetSeries(_ context.Context, id string) (torrent.Meta, error) {
-	meta, err := o.reqMeta("series", id)
+func (o *OMDB) GetEpisode(_ context.Context, id string) (torrent.Meta, error) {
+	meta, err := o.reqMeta("episode", id)
 	return torrent.Meta(meta), err
 }

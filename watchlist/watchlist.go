@@ -92,7 +92,14 @@ func (i *IMDB) reqWatchlist(kind, sort string, page int) (list []string, err err
 		return
 	}
 
-	return regexp.MustCompile(`tt\d{7}`).FindAllString(string(resp), -1), err
+	var re *regexp.Regexp
+	if kind == "tvEpisode" {
+		re = regexp.MustCompile(`tt\d{8}`)
+	} else {
+		re = regexp.MustCompile(`tt\d{7}`)
+	}
+
+	return re.FindAllString(string(resp), -1), err
 }
 
 func (i *IMDB) watchlist(kind, sort string) (watchlist []string, err error) {
@@ -124,6 +131,6 @@ func (i *IMDB) GetMovies() ([]string, error) {
 	return i.watchlist("movie", sortParam)
 }
 
-func (i *IMDB) GetSeries() ([]string, error) {
-	return i.watchlist("tvSeries", sortParam)
+func (i *IMDB) GetEpisodes() ([]string, error) {
+	return i.watchlist("tvEpisode", sortParam)
 }
