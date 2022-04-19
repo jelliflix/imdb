@@ -29,8 +29,8 @@ $ go mod tidy
 #### Watchlist
 
 ```go
-func (i *IMDB) GetMovies() ([]string, error)
-func (i *IMDB) GetSeries() ([]string, error)
+GetMovies() ([]string, error)
+GetSeries() ([]string, error)
 ```
 
 GetX returns all watchlist movies or tv series, order guaranteed.
@@ -47,5 +47,27 @@ series, _ := imdb.GetSeries()
 log.Println(movies, series)
 // Output:
 // [tt9170516] [tt7772588]
+```
+
+#### Meta getter
+
+```go
+GetMovie(ctx context.Context, imdbID string) (Meta, error)
+GetSeries(ctx context.Context, imdbID string) (Meta, error)
+```
+
+GetX returns meta for movie or tv series.
+
+##### Examples
+
+```go
+import mg "github.com/jelliflix/imdb/meta"
+
+omdb := mg.NewOMDB(mg.DefaultOptions, "xxxxxxxx")
+meta, _ := omdb.GetSeries(context.Background(), "tt7772588")
+
+log.Println(meta)
+// Output:
+// {For All Mankind 2019}
 ```
 
