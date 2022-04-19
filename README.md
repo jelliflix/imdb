@@ -1,7 +1,7 @@
 IMDB
 ====
 
-IMDB provides torrents for movies and TV shows by IMDB id.
+Torrent, meta and watchlist provider for movies and TV series by IMDB.
 
 ## Usage
 
@@ -30,33 +30,33 @@ $ go mod tidy
 
 ```go
 GetMovies() ([]string, error)
-GetSeries() ([]string, error)
+GetEpisodes() ([]string, error)
 ```
 
-GetX returns all watchlist movies or tv series, order guaranteed.
+GetX returns all watchlist movies or tv episodes, order guaranteed.
 
 ##### Examples
 
 ```go
 import wl "github.com/jelliflix/imdb/watchlist"
 
-imdb := wl.NewIMDB(wl.DefaultOptions, "ur012345678")
+imdb := wl.NewIMDB(wl.DefaultOptions, "ur152083192")
 movies, _ := imdb.GetMovies()
-series, _ := imdb.GetSeries()
+episodes, _ := imdb.GetEpisodes()
 
-log.Println(movies, series)
+log.Println(movies, episodes)
 // Output:
-// [tt9170516] [tt7772588]
+// [tt9170516] [tt12076928]
 ```
 
 #### Meta getter
 
 ```go
 GetMovie(ctx context.Context, imdbID string) (Meta, error)
-GetSeries(ctx context.Context, imdbID string) (Meta, error)
+GetEpisode(ctx context.Context, imdbID string) (Meta, error)
 ```
 
-GetX returns meta for movie or tv series.
+GetX returns meta for movie or tv episodes.
 
 ##### Examples
 
@@ -64,10 +64,10 @@ GetX returns meta for movie or tv series.
 import mg "github.com/jelliflix/imdb/meta"
 
 omdb := mg.NewOMDB(mg.DefaultOptions, "xxxxxxxx")
-meta, _ := omdb.GetSeries(context.Background(), "tt7772588")
+meta, _ := omdb.GetEpisode(context.Background(), "tt12076928")
 
 log.Println(meta)
 // Output:
-// {For All Mankind 2019}
+// {4 2 2021 Pathfinder}
 ```
 
