@@ -10,8 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/jelliflix/imdb/torrent"
 )
 
 type OMDB struct {
@@ -26,9 +24,10 @@ type Options struct {
 }
 
 type Meta struct {
-	Episode int
-	Season  int
-	Year    int
+	SeriesID string
+	Episode  int
+	Season   int
+	Year     int
 
 	Title string
 }
@@ -44,9 +43,10 @@ var DefaultOptions = Options{
 
 func (m *Meta) UnmarshalJSON(data []byte) error {
 	var v struct {
-		Episode string `json:"Episode,required"`
-		Season  string `json:"Season,required"`
-		Year    string `json:"Year,required"`
+		SeriesID string `json:"seriesID,required"`
+		Episode  string `json:"Episode,required"`
+		Season   string `json:"Season,required"`
+		Year     string `json:"Year,required"`
 
 		Title string `json:"Title,required"`
 	}
@@ -58,6 +58,14 @@ func (m *Meta) UnmarshalJSON(data []byte) error {
 	episode, _ := strconv.ParseInt(v.Episode, 0, 64)
 	season, _ := strconv.ParseInt(v.Season, 0, 64)
 	year, _ := strconv.ParseInt(strings.ReplaceAll(strings.Split(v.Year, "–")[0], "–", ""), 0, 64)
+
+	// Sometimes api only contains one `t` on series id.
+	series := []rune(v.SeriesID)
+	if len(series) > 0 && string(series[1]) != "t" {
+		m.SeriesID = "t" + v.SeriesID
+	} else {
+		m.SeriesID = v.SeriesID
+	}
 
 	m.Episode = int(episode)
 	m.Season = int(season)
@@ -113,12 +121,18 @@ func (o *OMDB) reqMeta(kind, id string) (meta Meta, err error) {
 	return
 }
 
-func (o *OMDB) GetMovie(_ context.Context, id string) (torrent.Meta, error) {
+func (o *OMDB) GetMovie(_ context.Context, id string) (Meta, error) {
 	meta, err := o.reqMeta("movie", id)
-	return torrent.Meta(meta), err
+	return meta, err
 }
 
-func (o *OMDB) GetEpisode(_ context.Context, id string) (torrent.Meta, error) {
+func (o *OMDB) GetEpisode(_ context.Context, id string) (Meta, error) {
 	meta, err := o.reqMeta("episode", id)
-	return torrent.Meta(meta), err
+	return meta, err
+}
+
+func (o *OMDB) GetSeriesByEpisode(ctx context.Context, id string) (Meta, error) {
+	episode, err := o.GetEpisode(ctx, id)
+	meta, err := o.reqMeta("series", episode.SeriesID)
+	return meta, err
 }

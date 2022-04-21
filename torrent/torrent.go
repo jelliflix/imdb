@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jelliflix/imdb/meta"
 	"go.uber.org/zap"
 )
 
@@ -17,21 +18,13 @@ var magnet2InfoHashRegex = regexp.MustCompile(`btih:.+?&`)
 type findFunc func(context.Context, MagnetFinder) ([]Result, error)
 
 type MetaGetter interface {
-	GetMovie(ctx context.Context, imdbID string) (Meta, error)
-	GetEpisode(ctx context.Context, imdbID string) (Meta, error)
+	GetMovie(ctx context.Context, imdbID string) (meta.Meta, error)
+	GetEpisode(ctx context.Context, imdbID string) (meta.Meta, error)
 }
 
 type MagnetFinder interface {
 	FindMovie(ctx context.Context, imdbID string) ([]Result, error)
 	FindEpisode(ctx context.Context, imdbID string, season, episode int) ([]Result, error)
-}
-
-type Meta struct {
-	Episode int
-	Season  int
-	Year    int
-
-	Title string
 }
 
 type Torrent struct {
@@ -157,9 +150,9 @@ func createMagnetURL(_ context.Context, infoHash, title string, trackers []strin
 
 func createSeriesSearch(ctx context.Context, metaGetter MetaGetter, imdbID string, season, episode int) (string, error) {
 	id := imdbID + ":" + strconv.Itoa(season) + ":" + strconv.Itoa(episode)
-	meta, err := metaGetter.GetEpisode(ctx, imdbID)
+	m, err := metaGetter.GetEpisode(ctx, imdbID)
 	if err != nil {
-		return "", fmt.Errorf("couldn't get TV show title via Cinemeta for ID %v: %v", id, err)
+		return "", fmt.Errorf("couldn't get series title for %v: %v", id, err)
 	}
 	seasonString := strconv.Itoa(season)
 	episodeString := strconv.Itoa(episode)
@@ -169,5 +162,5 @@ func createSeriesSearch(ctx context.Context, metaGetter MetaGetter, imdbID strin
 	if episode < 10 {
 		episodeString = "0" + episodeString
 	}
-	return fmt.Sprintf("%v S%vE%v", meta.Title, seasonString, episodeString), nil
+	return fmt.Sprintf("%v S%vE%v", m.Title, seasonString, episodeString), nil
 }
