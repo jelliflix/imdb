@@ -1,7 +1,7 @@
 IMDB
 ====
 
-Torrent, meta and watchlist provider for movies and TV series by IMDB.
+IMDB Watchlist exporter for Movies and TV series.
 
 ## Usage
 
