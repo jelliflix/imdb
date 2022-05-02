@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -81,7 +82,7 @@ func (i *IMDB) setID(id string) (err error) {
 	case id == "":
 		return fmt.Errorf("missing watchlist/user id")
 	default:
-		i.id = fmt.Sprintf("ls%v", id)
+		i.id = fmt.Sprintf("ls%s", id)
 	}
 
 	return
@@ -112,9 +113,14 @@ func (i *IMDB) ExportWatchList() (watchlist []Item, err error) {
 }
 
 type Item struct {
-	ID   string
-	Name string
-	Type string
+	ID      string
+	Name    string
+	Type    string
+	Rate    float64
+	Year    int
+	Runtime int
+
+	Genres []string
 }
 
 func parseWatchList(data [][]string) (watchList []Item) {
@@ -128,6 +134,14 @@ func parseWatchList(data [][]string) (watchList []Item) {
 					rec.Name = field
 				} else if j == 7 {
 					rec.Type = field
+				} else if j == 8 {
+					rec.Rate, _ = strconv.ParseFloat(field, 64)
+				} else if j == 9 {
+					rec.Runtime, _ = strconv.Atoi(field)
+				} else if j == 10 {
+					rec.Year, _ = strconv.Atoi(field)
+				} else if j == 11 {
+					rec.Genres = strings.Split(field, ", ")
 				}
 			}
 			watchList = append(watchList, rec)
